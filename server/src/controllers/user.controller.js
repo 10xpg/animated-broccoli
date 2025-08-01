@@ -7,7 +7,7 @@ const getLoggedInUser = async (req, res) => {
     const user = await User.findOne({ _id: sub });
 
     res.json({
-      message: "Fetched user successfuly",
+      message: "Fetched user successfully",
       success: true,
       data: user,
     });

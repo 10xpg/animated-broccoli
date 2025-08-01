@@ -5,8 +5,8 @@ const bcrypt = require("bcryptjs");
 const SECRET_KEY = process.env.JWT_SECRET;
 
 const signup = async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (user)
       return res.status(409).json({
@@ -29,9 +29,9 @@ const signup = async (req, res) => {
 };
 
 const signin = async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select("+password");
     if (!user)
       return res.status(404).json({
         message: `User with email '${email}' not found!`,
@@ -63,6 +63,7 @@ const signin = async (req, res) => {
       },
     );
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: error.message,
       success: false,
