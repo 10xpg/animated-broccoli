@@ -45,8 +45,8 @@ export const UserList = ({ searchKey }) => {
   const openChat = (selectedUser) => {
     const chat = allChats.find(
       (chat) =>
-        chat.members.includes(currentUser._id) &&
-        chat.members.includes(selectedUser),
+        chat.members.map((u) => u._id).includes(currentUser._id) &&
+        chat.members.map((u) => u._id).includes(selectedUser),
     );
 
     if (chat) {
@@ -60,7 +60,9 @@ export const UserList = ({ searchKey }) => {
         ((user.firstname.toLowerCase().includes(searchKey.toLowerCase()) ||
           user.lastname.toLowerCase().includes(searchKey.toLowerCase())) &&
           searchKey) ||
-        allChats?.some((chat) => chat.members.includes(user._id)),
+        allChats?.some((chat) =>
+          chat.members.map((u) => u._id).includes(user._id),
+        ),
     )
     .map((user) => (
       <div
@@ -85,7 +87,9 @@ export const UserList = ({ searchKey }) => {
               <div className="user-display-name">{getUserFullname(user)}</div>
               <div className="user-display-email">{user.email}</div>
             </div>
-            {!allChats?.find((chat) => chat.members.includes(user._id)) && (
+            {!allChats?.find((chat) =>
+              chat.members.map((u) => u._id).includes(user._id),
+            ) && (
               <div className="user-start-chat">
                 <button
                   type="button"
