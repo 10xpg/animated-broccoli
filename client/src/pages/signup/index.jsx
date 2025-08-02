@@ -3,6 +3,8 @@ import "../../index.css";
 import { Link } from "react-router-dom";
 import { signupUser } from "../../apis";
 import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { hideLoader, showLoader } from "../../redux";
 
 export default function SignUp() {
   const [user, setUser] = useState({
@@ -11,6 +13,7 @@ export default function SignUp() {
     email: "",
     password: "",
   });
+  const dispatch = useDispatch();
 
   const handleUserChange = (e) => {
     const { name, value } = e.target;
@@ -22,13 +25,16 @@ export default function SignUp() {
     let res = null;
 
     try {
+      dispatch(showLoader());
       res = await signupUser(user);
+      dispatch(hideLoader());
       if (res.success) {
         toast.success(res.message);
       } else {
         toast.error(res.message);
       }
     } catch (error) {
+      dispatch(hideLoader());
       toast.error(res.message);
     }
   };

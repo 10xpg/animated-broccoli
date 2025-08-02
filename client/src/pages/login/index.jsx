@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { loginUser } from "../../apis";
 import { toast } from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { hideLoader, showLoader } from "../../redux";
 
 export default function Login() {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const dispatch = useDispatch();
 
   const handleCredentialsChange = (e) => {
     const { name, value } = e.target;
@@ -16,7 +19,9 @@ export default function Login() {
     let res = null;
 
     try {
+      dispatch(showLoader());
       res = await loginUser(credentials);
+      dispatch(hideLoader());
       if (res.success) {
         toast.success(res.message);
         window.localStorage.setItem("token", res.accessToken);
@@ -25,6 +30,7 @@ export default function Login() {
         toast.error(res.message);
       }
     } catch (error) {
+      dispatch(hideLoader());
       toast.error(res.message);
     }
   };
