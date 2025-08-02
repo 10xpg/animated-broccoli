@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Search } from "../ui";
-import { UserList } from "./UserList.jsx";
+import { Search, UserList } from "../ui";
 
 export const Sidebar = () => {
   const [searchKey, setSearchKey] = useState("");

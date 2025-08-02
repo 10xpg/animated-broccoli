@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllUsers, getLoggedInUser } from "../../apis/user";
+import { getAllChats, getAllUsers, getLoggedInUser } from "../../apis";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { hideLoader, setAllUsers, setUser, showLoader } from "../../redux";
+import {
+  hideLoader,
+  setAllChats,
+  setAllUsers,
+  setUser,
+  showLoader,
+} from "../../redux";
 
 export const ProtectRoute = ({ children }) => {
   const navigate = useNavigate();
@@ -48,11 +54,30 @@ export const ProtectRoute = ({ children }) => {
     }
   };
 
+  const fetchCurrentUserChats = async () => {
+    let res = null;
+    try {
+      dispatch(showLoader());
+      res = await getAllChats();
+      dispatch(hideLoader());
+
+      if (res.success) {
+        dispatch(setAllChats(res.data));
+      } else {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      dispatch(hideLoader());
+      toast.error(error);
+    }
+  };
+
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     if (token) {
       fetchUser();
       fetchAllUsers();
+      fetchCurrentUserChats();
     } else {
       navigate("/login");
     }

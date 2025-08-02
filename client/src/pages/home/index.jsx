@@ -1,4 +1,5 @@
 import { Header, Sidebar } from "../../components/layout";
+import { ChatArea } from "../../components/ui";
 
 export default function Home() {
   return (
@@ -6,7 +7,7 @@ export default function Home() {
       <Header />
       <div className="main-content">
         <Sidebar />
-        {/* <!--CHAT AREA LAYOUT--> */}
+        <ChatArea />
       </div>
     </div>
   );
