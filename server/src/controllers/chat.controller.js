@@ -19,7 +19,9 @@ const createNewChat = async (req, res) => {
 const fetchChats = async (req, res) => {
   try {
     const { sub } = req.user;
-    const chats = await Chat.find({ members: { $in: sub } });
+    const chats = await Chat.find({ members: { $in: sub } })
+      .populate("members")
+      .sort({ updatedAt: -1 });
 
     res.json({
       message: "Fetched all chats successfully",
