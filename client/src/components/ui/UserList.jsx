@@ -13,6 +13,7 @@ export const UserList = ({ searchKey }) => {
   const {
     allUsers,
     allChats,
+    selectedChat,
     user: currentUser,
   } = useSelector((state) => state.userReducer);
   const dispatch = useDispatch();
@@ -54,6 +55,13 @@ export const UserList = ({ searchKey }) => {
     }
   };
 
+  const isSelectedChat = (user) => {
+    if (selectedChat) {
+      return selectedChat.members.map((u) => u._id).includes(user._id);
+    }
+    return false;
+  };
+
   return allUsers
     ?.filter(
       (user) =>
@@ -70,7 +78,9 @@ export const UserList = ({ searchKey }) => {
         onClick={() => openChat(user._id)}
         key={user._id}
       >
-        <div className="filtered-user">
+        <div
+          className={isSelectedChat(user) ? "selected-user" : "filtered-user"}
+        >
           <div className="filter-user-display">
             {user?.profilePic ? (
               <img
@@ -79,7 +89,13 @@ export const UserList = ({ searchKey }) => {
                 className="user-profile-image"
               />
             ) : (
-              <div className="user-default-profile-pic">
+              <div
+                className={
+                  isSelectedChat(user)
+                    ? "user-selected-avatar"
+                    : "user-default-avatar"
+                }
+              >
                 {getUserInitials(user)}
               </div>
             )}

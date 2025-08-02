@@ -1,4 +1,4 @@
-const capitalize = (word) => {
+export const capitalize = (word) => {
   const lCased = word?.toLowerCase();
   const firstLetterUcase = lCased?.charAt(0)?.toUpperCase();
 
