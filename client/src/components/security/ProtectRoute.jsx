@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllChats, getAllUsers, getLoggedInUser } from "../../apis";
 import toast from "react-hot-toast";
