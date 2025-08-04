@@ -1,12 +1,14 @@
 import { useDispatch, useSelector } from "react-redux";
-import { capitalize } from "../../utils";
+import { capitalize, formatTimestamp } from "../../utils";
 import { hideLoader, showLoader } from "../../redux";
-import { getMessagesForChat, message } from "../../apis";
+import { clearUnreadMsgCount, getMessagesForChat, message } from "../../apis";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 
-export const ChatArea = () => {
-  const { selectedChat, user } = useSelector((state) => state.userReducer);
+export const ChatArea = ({ socket }) => {
+  const { selectedChat, user, allChats } = useSelector(
+    (state) => state.userReducer,
+  );
   const dispatch = useDispatch();
   const [text, setText] = useState("");
   const [allMessages, setAllMessages] = useState([]);
@@ -51,10 +53,30 @@ export const ChatArea = () => {
       dispatch(hideLoader());
 
       if (res.success) {
-        toast.success(res.message);
+        // toast.success(res.message);
         setAllMessages(res.data);
-      } else {
-        toast.error(res.message);
+      }
+    } catch (error) {
+      dispatch(hideLoader());
+      toast.error(error);
+    }
+  };
+
+  const resetUnreadMessages = async () => {
+    let res = null;
+    const payload = { chatId: selectedChat._id };
+    try {
+      dispatch(showLoader());
+      res = await clearUnreadMsgCount(payload);
+      dispatch(hideLoader());
+
+      if (res.success) {
+        allChats.map((chat) => {
+          if (chat._id === selectedChat._id) {
+            return res.data;
+          }
+          return chat;
+        });
       }
     } catch (error) {
       dispatch(hideLoader());
@@ -65,6 +87,7 @@ export const ChatArea = () => {
   useEffect(() => {
     try {
       fetchAllMessages();
+      if (selectedChat.lastMessage.sender !== user._id) resetUnreadMessages();
     } catch (error) {
       console.error(error);
     }
@@ -88,12 +111,33 @@ export const ChatArea = () => {
                   }
                   key={m._id}
                 >
-                  <div
-                    className={
-                      isCurrentUserSender ? "send-message" : "received-message"
-                    }
-                  >
-                    {m.text}
+                  <div>
+                    <div
+                      className={
+                        isCurrentUserSender
+                          ? "send-message"
+                          : "received-message"
+                      }
+                    >
+                      {m.text}
+                    </div>
+                    <div
+                      className="message-timestamp"
+                      style={
+                        isCurrentUserSender
+                          ? { float: "right" }
+                          : { float: "left" }
+                      }
+                    >
+                      {formatTimestamp(m.createdAt)}
+                      {isCurrentUserSender && m.read && (
+                        <i
+                          className="fa fa-check-circle"
+                          aria-hidden="true"
+                          style={{ color: "#e74c3c" }}
+                        ></i>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

@@ -11,6 +11,10 @@
   font-family: "Poppins", sans-serif;
 }
 
+body {
+  overflow-y: hidden;
+}
+
 /*******************************************************
 *************CSS STYLES FOR LOGIN & SIGNUP**************
 ********************************************************/
@@ -338,7 +342,7 @@ i {
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  min-height: 70vh;
+  height: 85vh;
 }
 
 /*******************************************************
@@ -383,10 +387,13 @@ i {
 ********************************************************/
 .main-chat-area {
   flex: 1;
+  overflow-y: scroll;
+  padding: 10px 20px;
 }
 
 .send-message-div {
   position: relative;
+  margin-top: 20px;
 }
 
 .send-message-input {
@@ -410,6 +417,30 @@ i {
   margin-top: 5px;
 }
 
+/*****************************************************
+***********CUSTOM SCROLLBAR FOR CHATAREA**************
+******************************************************/
+.main-chat-area::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+.main-chat-area::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 2px grey;
+  border-radius: 10px;
+}
+
+/* Handle */
+.main-chat-area::-webkit-scrollbar-thumb {
+  background: #e74c3c;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+.main-chat-area::-webkit-scrollbar-thumb:hover {
+  background: #e74c3c;
+}
+
 /*******************************************************
 ***************CSS FOR CHAT MESSAGES********************
 ********************************************************/
@@ -420,7 +451,7 @@ i {
 .received-message {
   padding: 10px 20px;
   margin-top: 5px;
-  border-radius: 3px;
+  border-radius: 10px;
   font-size: 14px;
   width: fit-content;
 }
@@ -429,10 +460,52 @@ i {
   background-color: #e74c3c;
   color: white;
   margin-left: 100px;
+  border-top-right-radius: 0px;
 }
 
 .received-message {
   background-color: #ddd;
   color: #28282b;
   margin-right: 100px;
+  border-bottom-left-radius: 0px;
+}
+
+.message-timestamp {
+  width: fit-content;
+  font-size: 13px;
+}
+
+.last-message-timestamp {
+  font-size: 13px;
+}
+
+.unread-message-count {
+  text-align: center;
+  float: right;
+  font-size: 13px;
+  padding-top: 3px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: #e74c3c;
+  font-weight: bold;
+  color: white;
+}
+/*****************************************************
+************MEDIA QUERY FOR USER LIST*****************
+******************************************************/
+
+@media only screen and (max-width: 1000px) {
+  .filter-user-details {
+    display: none;
+  }
+  .user-search-area {
+    display: none;
+  }
+  .app-sidebar {
+    width: 15%;
+  }
+  .app-chat-area {
+    width: 85%;
+  }
 }

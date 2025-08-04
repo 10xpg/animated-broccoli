@@ -17,3 +17,12 @@ export const createNewChat = async (data) => {
     return error.response.data;
   }
 };
+
+export const clearUnreadMsgCount = async (data) => {
+  try {
+    const response = await httpClient.post("/api/chat/clear", data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+};

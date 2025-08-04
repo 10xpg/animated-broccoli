@@ -1,5 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
-import { getUserFullname, getUserInitials } from "../../utils";
+import {
+  formatLastMessageTs,
+  formatTimestamp,
+  getUserFullname,
+  getUserInitials,
+} from "../../utils";
 import toast from "react-hot-toast";
 import {
   hideLoader,
@@ -62,17 +67,65 @@ export const UserList = ({ searchKey }) => {
     return false;
   };
 
-  return allUsers
-    ?.filter(
-      (user) =>
-        ((user.firstname.toLowerCase().includes(searchKey.toLowerCase()) ||
-          user.lastname.toLowerCase().includes(searchKey.toLowerCase())) &&
-          searchKey) ||
-        allChats?.some((chat) =>
-          chat.members.map((u) => u._id).includes(user._id),
-        ),
-    )
-    .map((user) => (
+  const fetchLastMessage = (user) => {
+    const chat = allChats.find((chat) =>
+      chat.members.map((m) => m._id).includes(user),
+    );
+    if (!chat || !chat.lastMessage) {
+      return "";
+    } else {
+      const msgPrefix =
+        chat?.lastMessage?.sender === currentUser._id ? "You: " : "";
+      return `${msgPrefix}${chat?.lastMessage?.text?.substring(0, 25)}`;
+    }
+  };
+
+  const getLastMessageTs = (user) => {
+    const chat = allChats.find((chat) =>
+      chat.members.map((m) => m._id).includes(user),
+    );
+    if (!chat || !chat.lastMessage) {
+      return "";
+    } else {
+      return formatLastMessageTs(chat?.lastMessage?.createdAt);
+    }
+  };
+
+  const getUnreadMsgCount = (user) => {
+    const chat = allChats.find((chat) =>
+      chat.members.map((m) => m._id).includes(user),
+    );
+    if (
+      chat &&
+      chat?.unreadMessageCount &&
+      chat.lastMessage.sender !== currentUser._id
+    ) {
+      return (
+        <div className="unread-message-count">{chat.unreadMessageCount}</div>
+      );
+    } else {
+      return "";
+    }
+  };
+
+  const getData = () => {
+    if (searchKey === "") {
+      return allChats;
+    } else {
+      return allUsers.filter(
+        (user) =>
+          user?.firstname.toLowerCase().includes(searchKey.toLowerCase()) ||
+          user?.lastname.toLowerCase().includes(searchKey.toLowerCase()),
+      );
+    }
+  };
+
+  return getData().map((obj) => {
+    let user = obj;
+    if (obj?.members) {
+      user = obj.members.find((m) => m._id !== currentUser._id);
+    }
+    return (
       <div
         className="user-search-filter"
         onClick={() => openChat(user._id)}
@@ -101,7 +154,15 @@ export const UserList = ({ searchKey }) => {
             )}
             <div className="filter-user-details">
               <div className="user-display-name">{getUserFullname(user)}</div>
-              <div className="user-display-email">{user.email}</div>
+              <div className="user-display-email">
+                {fetchLastMessage(user._id) || user.email}
+              </div>
+            </div>
+            <div>
+              {getUnreadMsgCount(user._id)}
+              <div className="last-message-timestamp">
+                {getLastMessageTs(user._id)}
+              </div>
             </div>
             {!allChats?.find((chat) =>
               chat.members.map((u) => u._id).includes(user._id),
@@ -119,5 +180,6 @@ export const UserList = ({ searchKey }) => {
           </div>
         </div>
       </div>
-    ));
+    );
+  });
 };
