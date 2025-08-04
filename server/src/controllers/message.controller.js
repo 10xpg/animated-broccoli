@@ -42,4 +42,5 @@ const fetchMessages = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
 module.exports = { sendMessage, fetchMessages };
