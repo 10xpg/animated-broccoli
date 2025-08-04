@@ -112,7 +112,8 @@ export const UserList = ({ searchKey }) => {
     if (searchKey === "") {
       return allChats;
     } else {
-      return allUsers.filter(
+      // return allUsers.filter(
+      allUsers.filter(
         (user) =>
           user?.firstname.toLowerCase().includes(searchKey.toLowerCase()) ||
           user?.lastname.toLowerCase().includes(searchKey.toLowerCase()),

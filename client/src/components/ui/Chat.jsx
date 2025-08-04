@@ -1,9 +1,10 @@
 import { useDispatch, useSelector } from "react-redux";
 import { capitalize, formatTimestamp } from "../../utils";
-import { hideLoader, showLoader } from "../../redux";
+import { hideLoader, showLoader, Store } from "../../redux";
 import { clearUnreadMsgCount, getMessagesForChat, message } from "../../apis";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { formatISO } from "date-fns";
 
 export const ChatArea = ({ socket }) => {
   const { selectedChat, user, allChats } = useSelector(
@@ -20,26 +21,26 @@ export const ChatArea = ({ socket }) => {
   const selectedUser = selectedChat.members.find((u) => u._id !== user._id);
 
   const sendMessage = async () => {
-    const msg = {
-      chatId: selectedChat._id,
-      text,
-    };
-
-    let res = null;
-
     try {
-      dispatch(showLoader());
-      res = await message(msg);
-      dispatch(hideLoader());
+      const msg = {
+        chatId: selectedChat._id,
+        text,
+      };
+
+      socket.emit("send-msg", {
+        ...msg,
+        members: selectedChat.members.map((m) => m._id),
+        sender: user._id,
+        read: false,
+        createdAt: formatISO(Date.now()),
+      });
+
+      const res = await message(msg);
 
       if (res.success) {
-        toast.success(res.message);
         setText("");
-      } else {
-        toast.error(res.message);
       }
     } catch (error) {
-      dispatch(hideLoader());
       toast.error(error);
     }
   };
@@ -85,22 +86,34 @@ export const ChatArea = ({ socket }) => {
   };
 
   useEffect(() => {
-    try {
-      fetchAllMessages();
-      if (selectedChat.lastMessage.sender !== user._id) resetUnreadMessages();
-    } catch (error) {
-      console.error(error);
+    fetchAllMessages();
+    if (selectedChat.lastMessage.sender !== user._id) {
+      resetUnreadMessages();
     }
+
+    socket.off("receive-msg").on("receive-msg", (msg) => {
+      const selectedChat = Store.getState().userReducer.selectedChat;
+
+      if (selectedChat._id === msg.chatId) {
+        setAllMessages((prevmsg) => [...prevmsg, msg]);
+      }
+    });
   }, [selectedChat]);
+
+  useEffect(() => {
+    const messageContainer = document.getElementById("main-chat-area");
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+  }, [allMessages]);
 
   return (
     <>
       {selectedChat && (
         <div className="app-chat-area">
           <div className="app-chat-area-header">{`${capitalize(selectedUser.firstname)} ${capitalize(selectedUser.lastname)}`}</div>
-          <div className="main-chat-area">
+          <div className="main-chat-area" id="main-chat-area">
             {allMessages.map((m) => {
-              const isCurrentUserSender = m.sender === user._id;
+              const isCurrentUserSender = m?.sender === user._id;
+
               return (
                 <div
                   className="message-container"
