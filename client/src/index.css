@@ -417,6 +417,17 @@ i {
   margin-top: 5px;
 }
 
+.send-emoji-btn {
+  position: absolute;
+  right: 50px;
+  font-size: 25px;
+  color: #e74c3c;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  margin-top: 5px;
+}
+
 /*****************************************************
 ***********CUSTOM SCROLLBAR FOR CHATAREA**************
 ******************************************************/
@@ -515,4 +526,75 @@ i {
   .app-chat-area {
     width: 85%;
   }
+}
+
+/*****************************************************
+*************CSS STYLES FOR PROFILE PAGE**************
+******************************************************/
+
+.profile-page-container {
+  display: flex;
+  width: 80%;
+  color: #28282b;
+  margin: 100px auto;
+  padding: 20px 20px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+.profile-pic-container {
+  width: 30%;
+  display: flex;
+  justify-content: center;
+}
+.profile-info-container {
+  width: 70%;
+  padding: 30px 10px;
+}
+.user-profile-pic-upload,
+.user-default-profile-avatar {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  color: #28282b;
+  border: #ddd 5px solid;
+  font-size: 120px;
+  font-weight: bold;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 240px;
+}
+
+.user-profile-name {
+  padding: 10px 0px;
+  border-bottom: #cdcdcd 1.5px solid;
+  margin-bottom: 30px;
+}
+.select-profile-pic-container {
+  padding: 30px 0px;
+}
+
+/* file upload button */
+input[type="file"]::file-selector-button {
+  border-radius: 4px;
+  padding: 0 16px;
+  height: 40px;
+  cursor: pointer;
+  background-color: #28282b;
+  color: white;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 200ms;
+}
+
+/* file upload button hover state */
+input[type="file"]::file-selector-button:hover {
+  background-color: #f3f4f6;
+  color: #28282b;
+}
+
+/* file upload button active state */
+input[type="file"]::file-selector-button:active {
+  background-color: #e5e7eb;
+  color: #28282b;
 }

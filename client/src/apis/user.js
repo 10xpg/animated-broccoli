@@ -17,3 +17,15 @@ export const getAllUsers = async () => {
     return error.response.data;
   }
 };
+
+export const uploadProfileImg = async (file) => {
+  try {
+    const response = await httpClient.post(
+      "/api/user/upload-profile-pic",
+      file,
+    );
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+};

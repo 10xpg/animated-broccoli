@@ -17,3 +17,9 @@ export const formatLastMessageTs = (timestamp) => {
   const formattedTs = format(ts, "hh:mm a");
   return formattedTs;
 };
+
+export const formatCreatedAt = (timestamp) => {
+  const ts = parseISO(timestamp);
+  const formattedTs = format(ts, "MMM dd, yyyy");
+  return formattedTs;
+};

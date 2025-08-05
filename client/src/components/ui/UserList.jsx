@@ -162,14 +162,14 @@ export const UserList = ({ searchKey, socket, onlineUser }) => {
           className={isSelectedChat(user) ? "selected-user" : "filtered-user"}
         >
           <div className="filter-user-display">
-            {user?.profilePic ? (
+            {user?.profileImg ? (
               <img
                 style={
                   onlineUser.includes(user._id)
                     ? { border: "#82e0aa 3px solid" }
                     : {}
                 }
-                src={user.profilePic}
+                src={user.profileImg}
                 alt="Profile Pic"
                 className="user-profile-image"
               />

@@ -5,6 +5,7 @@ import { clearUnreadMsgCount, getMessagesForChat, message } from "../../apis";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { formatISO } from "date-fns";
+import EmojiPicker from "emoji-picker-react";
 
 export const ChatArea = ({ socket }) => {
   const { selectedChat, user, allChats } = useSelector(
@@ -14,6 +15,7 @@ export const ChatArea = ({ socket }) => {
   const [text, setText] = useState("");
   const [allMessages, setAllMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const handleChange = (e) => {
     setText(e.target.value);
@@ -46,6 +48,7 @@ export const ChatArea = ({ socket }) => {
 
       if (res.success) {
         setText("");
+        setShowEmojiPicker(false);
       }
     } catch (error) {
       toast.error(error);
@@ -98,8 +101,7 @@ export const ChatArea = ({ socket }) => {
       resetUnreadMessages();
     }
 
-    // socket.off("receive-msg").on("receive-msg", (msg) => {
-    socket.on("receive-msg", (msg) => {
+    socket.off("receive-msg").on("receive-msg", (msg) => {
       const selectedChat = Store.getState().userReducer.selectedChat;
 
       if (selectedChat._id === msg.chatId) {
@@ -203,6 +205,11 @@ export const ChatArea = ({ socket }) => {
               {isTyping && <i>typing...</i>}
             </div>
           </div>
+          {showEmojiPicker && (
+            <div>
+              <EmojiPicker onEmojiClick={(e) => setText(text + e.emoji)} />
+            </div>
+          )}
           <div className="send-message-div">
             <input
               type="text"
@@ -211,6 +218,11 @@ export const ChatArea = ({ socket }) => {
               value={text}
               onChange={handleChange}
             />
+            <button
+              className="fa fa-smile-o send-emoji-btn"
+              aria-hidden="true"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            ></button>
             <button
               className="fa fa-paper-plane send-message-btn"
               aria-hidden="true"
