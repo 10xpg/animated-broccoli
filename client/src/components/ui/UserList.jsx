@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import {
   formatLastMessageTs,
-  formatTimestamp,
   getUserFullname,
   getUserInitials,
 } from "../../utils";
@@ -11,10 +10,12 @@ import {
   setAllChats,
   setSelectedChat,
   showLoader,
+  Store,
 } from "../../redux";
 import { createNewChat } from "../../apis";
+import { useEffect } from "react";
 
-export const UserList = ({ searchKey }) => {
+export const UserList = ({ searchKey, socket, onlineUser }) => {
   const {
     allUsers,
     allChats,
@@ -112,14 +113,39 @@ export const UserList = ({ searchKey }) => {
     if (searchKey === "") {
       return allChats;
     } else {
-      // return allUsers.filter(
-      allUsers.filter(
+      return allUsers.filter(
         (user) =>
           user?.firstname.toLowerCase().includes(searchKey.toLowerCase()) ||
           user?.lastname.toLowerCase().includes(searchKey.toLowerCase()),
       );
     }
   };
+
+  useEffect(() => {
+    socket.on("receive-msg", (msg) => {
+      const selectedChat = Store.getState().userReducer.selectedChat;
+      let allChats = Store.getState().userReducer.allChats;
+
+      if (selectedChat._id !== msg.chatId) {
+        const updatedChats = allChats.map((chat) => {
+          if (chat._id === msg.chatId) {
+            return {
+              ...chat,
+              unreadMessageCount: (chat?.unreadMessageCount || 0) + 1,
+              lastMessage: msg,
+            };
+          }
+          return chat;
+        });
+        allChats = updatedChats;
+      }
+      const latestChat = allChats.find((c) => c._id === msg.chatId);
+      const otherChats = allChats.filter((c) => c._id !== msg.chatId);
+
+      allChats = [latestChat, ...otherChats];
+      dispatch(setAllChats(allChats));
+    });
+  }, []);
 
   return getData().map((obj) => {
     let user = obj;
@@ -138,6 +164,11 @@ export const UserList = ({ searchKey }) => {
           <div className="filter-user-display">
             {user?.profilePic ? (
               <img
+                style={
+                  onlineUser.includes(user._id)
+                    ? { border: "#82e0aa 3px solid" }
+                    : {}
+                }
                 src={user.profilePic}
                 alt="Profile Pic"
                 className="user-profile-image"
@@ -148,6 +179,11 @@ export const UserList = ({ searchKey }) => {
                   isSelectedChat(user)
                     ? "user-selected-avatar"
                     : "user-default-avatar"
+                }
+                style={
+                  onlineUser.includes(user._id)
+                    ? { border: "#82e0aa 3px solid" }
+                    : {}
                 }
               >
                 {getUserInitials(user)}

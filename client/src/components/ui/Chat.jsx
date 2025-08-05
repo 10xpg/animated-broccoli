@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { capitalize, formatTimestamp } from "../../utils";
-import { hideLoader, showLoader, Store } from "../../redux";
+import { hideLoader, setAllChats, showLoader, Store } from "../../redux";
 import { clearUnreadMsgCount, getMessagesForChat, message } from "../../apis";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
@@ -13,9 +13,16 @@ export const ChatArea = ({ socket }) => {
   const dispatch = useDispatch();
   const [text, setText] = useState("");
   const [allMessages, setAllMessages] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
 
   const handleChange = (e) => {
     setText(e.target.value);
+
+    socket.emit("user-typing", {
+      chatId: selectedChat.chatId,
+      members: selectedChat.members.map((m) => m._id),
+      sender: user._id,
+    });
   };
 
   const selectedUser = selectedChat.members.find((u) => u._id !== user._id);
@@ -54,7 +61,6 @@ export const ChatArea = ({ socket }) => {
       dispatch(hideLoader());
 
       if (res.success) {
-        // toast.success(res.message);
         setAllMessages(res.data);
       }
     } catch (error) {
@@ -67,9 +73,11 @@ export const ChatArea = ({ socket }) => {
     let res = null;
     const payload = { chatId: selectedChat._id };
     try {
-      dispatch(showLoader());
+      socket.emit("clr-unread-msg", {
+        chatId: selectedChat._id,
+        members: selectedChat.members.map((m) => m._id),
+      });
       res = await clearUnreadMsgCount(payload);
-      dispatch(hideLoader());
 
       if (res.success) {
         allChats.map((chat) => {
@@ -80,22 +88,58 @@ export const ChatArea = ({ socket }) => {
         });
       }
     } catch (error) {
-      dispatch(hideLoader());
       toast.error(error);
     }
   };
 
   useEffect(() => {
     fetchAllMessages();
-    if (selectedChat.lastMessage.sender !== user._id) {
+    if (selectedChat?.lastMessage?.sender !== user._id) {
       resetUnreadMessages();
     }
 
-    socket.off("receive-msg").on("receive-msg", (msg) => {
+    // socket.off("receive-msg").on("receive-msg", (msg) => {
+    socket.on("receive-msg", (msg) => {
       const selectedChat = Store.getState().userReducer.selectedChat;
 
       if (selectedChat._id === msg.chatId) {
         setAllMessages((prevmsg) => [...prevmsg, msg]);
+      }
+
+      if (selectedChat._id === msg.chatId && msg.sender !== user._id)
+        resetUnreadMessages();
+    });
+
+    // TODO: fix IRT unread message count display
+    socket.on("msg-count-cleared", (chat) => {
+      const selectedChat = Store.getState().userReducer.selectedChat;
+      const allChats = Store.getState().userReducer.allChats;
+
+      if (selectedChat._id === chat.chatId) {
+        const updatedChats = allChats.map((c) => {
+          if (c._id === chat.chatId) {
+            return { ...c, unreadMessageCount: 0 };
+          }
+          return c;
+        });
+
+        dispatch(setAllChats(updatedChats));
+
+        setAllMessages((prevmsg) => {
+          return prevmsg.map((msg) => {
+            return { ...msg, read: true };
+          });
+        });
+      }
+    });
+
+    // TODO: fix started-typing display
+    socket.on("started-typing", (chat) => {
+      if (selectedChat._id === chat.chatId && chat.sender !== user._id) {
+        setIsTyping(true);
+        setTimeout(() => {
+          setIsTyping(false);
+        }, 2000);
       }
     });
   }, [selectedChat]);
@@ -103,7 +147,7 @@ export const ChatArea = ({ socket }) => {
   useEffect(() => {
     const messageContainer = document.getElementById("main-chat-area");
     messageContainer.scrollTop = messageContainer.scrollHeight;
-  }, [allMessages]);
+  }, [allMessages, isTyping]);
 
   return (
     <>
@@ -155,6 +199,9 @@ export const ChatArea = ({ socket }) => {
                 </div>
               );
             })}
+            <div className="typing-indicator">
+              {isTyping && <i>typing...</i>}
+            </div>
           </div>
           <div className="send-message-div">
             <input

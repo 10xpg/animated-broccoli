@@ -491,11 +491,18 @@ i {
   font-weight: bold;
   color: white;
 }
+
+.typing-indicator {
+  font-size: 13px;
+  color: gray;
+}
+
 /*****************************************************
 ************MEDIA QUERY FOR USER LIST*****************
 ******************************************************/
 
 @media only screen and (max-width: 1000px) {
+  .last-message-timestamp,
   .filter-user-details {
     display: none;
   }
