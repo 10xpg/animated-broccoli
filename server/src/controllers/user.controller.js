@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const { routeProtection } = require("../middlewares/auth.middleware");
+const cloudinary = require("../config/cloudinary.config");
 
 const getLoggedInUser = async (req, res) => {
   try {
@@ -15,6 +15,7 @@ const getLoggedInUser = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
+
 const fetchUsers = async (req, res) => {
   try {
     const { sub } = req.user;
@@ -28,4 +29,32 @@ const fetchUsers = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
-module.exports = { getLoggedInUser, fetchUsers };
+
+const uploadProfilePic = async (req, res) => {
+  try {
+    const { sub } = req.user;
+    const { image } = req.body;
+
+    // upload img to cloudinary
+    const { secure_url: imageUrl } = await cloudinary.uploader.upload(image, {
+      folder: "quickchat",
+    });
+
+    // set profilePic on user model
+    const user = await User.findByIdAndUpdate(
+      { _id: sub },
+      { profileImg: imageUrl },
+      { new: true },
+    );
+
+    res.json({
+      message: "Profile picture update successful",
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message, success: false });
+  }
+};
+
+module.exports = { getLoggedInUser, fetchUsers, uploadProfilePic };
