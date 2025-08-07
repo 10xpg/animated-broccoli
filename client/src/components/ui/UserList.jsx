@@ -122,7 +122,7 @@ export const UserList = ({ searchKey, socket, onlineUser }) => {
   };
 
   useEffect(() => {
-    socket.on("receive-msg", (msg) => {
+    socket.off("set-msg-count").on("set-msg-count", (msg) => {
       const selectedChat = Store.getState().userReducer.selectedChat;
       let allChats = Store.getState().userReducer.allChats;
 

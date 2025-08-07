@@ -16,6 +16,7 @@ export const ChatArea = ({ socket }) => {
   const [allMessages, setAllMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [data, setData] = useState(null);
 
   const handleChange = (e) => {
     setText(e.target.value);
@@ -29,11 +30,12 @@ export const ChatArea = ({ socket }) => {
 
   const selectedUser = selectedChat.members.find((u) => u._id !== user._id);
 
-  const sendMessage = async () => {
+  const sendMessage = async (image = "") => {
     try {
       const msg = {
         chatId: selectedChat._id,
         text,
+        image,
       };
 
       socket.emit("send-msg", {
@@ -151,13 +153,23 @@ export const ChatArea = ({ socket }) => {
     messageContainer.scrollTop = messageContainer.scrollHeight;
   }, [allMessages, isTyping]);
 
+  const sendImage = async (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader(file);
+
+    reader.readAsDataURL(file);
+    reader.onloadend = async () => {
+      sendMessage(reader.result);
+    };
+  };
+
   return (
     <>
       {selectedChat && (
         <div className="app-chat-area">
           <div className="app-chat-area-header">{`${capitalize(selectedUser.firstname)} ${capitalize(selectedUser.lastname)}`}</div>
           <div className="main-chat-area" id="main-chat-area">
-            {allMessages.map((m) => {
+            {allMessages.map((m, index) => {
               const isCurrentUserSender = m?.sender === user._id;
 
               return (
@@ -168,7 +180,7 @@ export const ChatArea = ({ socket }) => {
                       ? { justifyContent: "end" }
                       : { justifyContent: "start" }
                   }
-                  key={m._id}
+                  key={index}
                 >
                   <div>
                     <div
@@ -178,7 +190,17 @@ export const ChatArea = ({ socket }) => {
                           : "received-message"
                       }
                     >
-                      {m.text}
+                      <div>{m.text}</div>
+                      <div>
+                        {m?.image && (
+                          <img
+                            src={m?.image}
+                            alt="message-image"
+                            height="120"
+                            width="120"
+                          />
+                        )}
+                      </div>
                     </div>
                     <div
                       className="message-timestamp"
@@ -202,12 +224,25 @@ export const ChatArea = ({ socket }) => {
               );
             })}
             <div className="typing-indicator">
-              {isTyping && <i>typing...</i>}
+              {isTyping &&
+                selectedChat?.members
+                  .map((m) => m._id)
+                  .includes(data?.sender) && <i>typing...</i>}
             </div>
           </div>
           {showEmojiPicker && (
-            <div>
-              <EmojiPicker onEmojiClick={(e) => setText(text + e.emoji)} />
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                padding: "0px 20px",
+                justifyContent: "right",
+              }}
+            >
+              <EmojiPicker
+                style={{ width: "300px", height: "400px" }}
+                onEmojiClick={(e) => setText(text + e.emoji)}
+              />
             </div>
           )}
           <div className="send-message-div">
@@ -218,6 +253,18 @@ export const ChatArea = ({ socket }) => {
               value={text}
               onChange={handleChange}
             />
+
+            <label htmlFor="file">
+              <i className="fa fa-picture-o send-image-btn"></i>
+              <input
+                type="file"
+                id="file"
+                style={{ display: "none" }}
+                accept="image/jpg,image/png,image/jpeg,image/gif"
+                onChange={() => sendImage("")}
+              />
+            </label>
+
             <button
               className="fa fa-smile-o send-emoji-btn"
               aria-hidden="true"

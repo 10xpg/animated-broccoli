@@ -2,9 +2,16 @@ import { useSelector } from "react-redux";
 import { getUserFullname, getUserInitials } from "../../utils";
 import { useNavigate } from "react-router-dom";
 
-export const Header = () => {
+export const Header = ({ socket }) => {
   const { user } = useSelector((state) => state.userReducer);
   const navigate = useNavigate();
+
+  const logout = () => {
+    window.localStorage.removeItem("token");
+    navigate("/login");
+
+    socket.emit("user-offline", { user });
+  };
 
   return (
     <div className="app-header">
@@ -13,7 +20,6 @@ export const Header = () => {
         Quick Chat
       </div>
       <div className="app-user-profile">
-        <div className="logged-user-name">{getUserFullname(user)}</div>
         {user?.profileImg ? (
           <img
             onClick={() => navigate("/profile")}
@@ -29,6 +35,10 @@ export const Header = () => {
             {getUserInitials(user)}
           </div>
         )}
+        <div className="logged-user-name">{getUserFullname(user)}</div>
+        <button type="button" className="logout-btn" onClick={logout}>
+          <i className="fa fa-power-off"></i>
+        </button>
       </div>
     </div>
   );

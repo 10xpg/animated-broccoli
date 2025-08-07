@@ -3,10 +3,10 @@ const Message = require("../models/message.model");
 
 const sendMessage = async (req, res) => {
   try {
-    const { text, chatId } = req.body;
+    const { image, text, chatId } = req.body;
     const { sub } = req.user;
 
-    const message = await Message.create({ text, chatId, sender: sub });
+    const message = await Message.create({ text, chatId, sender: sub, image });
 
     const currentChat = await Chat.findOneAndUpdate(
       { _id: chatId },

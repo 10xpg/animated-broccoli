@@ -17,12 +17,15 @@ export default function Home() {
       SOCKET.on("online-users", (onlineUsers) => {
         setOnlineUser(onlineUsers);
       });
+      SOCKET.on("online-users-updated", (onlineUsers) => {
+        setOnlineUser(onlineUsers);
+      });
     }
-  }, [user]);
+  }, [user, onlineUser]);
 
   return (
     <div className="home-page">
-      <Header />
+      <Header socket={SOCKET} />
       <div className="main-content">
         <Sidebar socket={SOCKET} onlineUser={onlineUser} />
         {selectedChat && <ChatArea socket={SOCKET} />}

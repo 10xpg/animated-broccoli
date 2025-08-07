@@ -219,10 +219,12 @@ i {
   color: #28282b;
   font-weight: bold;
   padding-top: 10px;
-  padding-right: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .logged-user-profile-pic {
+  cursor: pointer;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -233,6 +235,14 @@ i {
   text-align: center;
   vertical-align: middle;
   line-height: 40px;
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: #e74c3c;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
 }
 
 /*******************************************************
@@ -428,6 +438,16 @@ i {
   margin-top: 5px;
 }
 
+.send-image-btn {
+  position: absolute;
+  right: 80px;
+  font-size: 25px;
+  color: #e74c3c;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  margin-top: 5px;
+}
 /*****************************************************
 ***********CUSTOM SCROLLBAR FOR CHATAREA**************
 ******************************************************/
